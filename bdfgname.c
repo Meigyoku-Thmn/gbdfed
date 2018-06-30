@@ -194,7 +194,7 @@ _bdf_find_adobe_name(int code, char *name, FILE *in)
     }
 
     if (code >= 0xe000 && code <= 0xf8ff) {
-        sprintf(name, "uni%04X", code & 0xffff);
+        sprintf(name, "uni%06X", code & 0x1fffff);
         return (int) strlen(name);
     }
 
@@ -220,7 +220,7 @@ _bdf_find_adobe_name(int code, char *name, FILE *in)
         }
     }
 
-    sprintf(name, "uni%04X", code & 0xffff);
+    sprintf(name, "uni%06X", code & 0x1fffff);
     return (int) strlen(name);
 }
 
@@ -310,10 +310,10 @@ bdf_set_glyph_code_names(int prefix, bdf_font_t *font, bdf_callback_t callback)
     for (changed = 0, i = 0, gp = font->glyphs; i < font->glyphs_used;
          i++, gp++) {
         switch (prefix) {
-          case 'u': sprintf(name, "uni%04X", gp->encoding & 0xffff); break;
-          case 'x': sprintf(name, "0x%04X", gp->encoding & 0xffff); break;
-          case '+': sprintf(name, "U+%04X", gp->encoding & 0xffff); break;
-          case '\\': sprintf(name, "\\u%04X", gp->encoding & 0xffff); break;
+          case 'u': sprintf(name, "uni%06X", gp->encoding & 0x1fffff); break;
+          case 'x': sprintf(name, "0x%06X", gp->encoding & 0x1fffff); break;
+          case '+': sprintf(name, "U+%06X", gp->encoding & 0x1fffff); break;
+          case '\\': sprintf(name, "\\u%06X", gp->encoding & 0x1fffff); break;
         }
         size = 6;
 

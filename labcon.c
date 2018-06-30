@@ -237,7 +237,7 @@ static gboolean
 draw_pixbuf(GtkWidget *w, GdkEventExpose *event, gpointer data)
 {
     LabCon *l = LABCON(data);
-    gint x, y, wd, ht;
+    gint x = 0, y, wd, ht;
     GtkAllocation all;
     const GdkPixbuf *p = GDK_PIXBUF(l->pixbuf);
 

@@ -387,6 +387,11 @@ fontgrid_destroy(GtkObject *obj)
     g_return_if_fail(IS_FONTGRID(obj));
 
     f = FONTGRID(obj);
+    
+    if (f->npage.selmap)
+      free(f->npage.selmap);
+    if (f->upage.selmap)
+      free(f->upage.selmap);
 
     /*
      * Clean up this object instance.
@@ -922,7 +927,7 @@ fontgrid_draw_cells(GtkWidget *widget, gint32 start, gint32 end,
             ly = y + as;
 
             mod = FALSE;
-            if (i <= 0xffff)
+            if (i <= 0x10ffff)
               mod = (!fw->unencoded) ? bdf_glyph_modified(font, i, 0) :
                 bdf_glyph_modified(font, i, 1);
 
@@ -964,7 +969,7 @@ fontgrid_draw_cells(GtkWidget *widget, gint32 start, gint32 end,
             rect.width = fw->cell_width - 2;
             rect.height = (fw->cell_height - fw->label_height) - 2;
 
-            if (i <= 0xffff && nglyphs > 0 && glyph->encoding == i) {
+            if (i <= 0x10ffff && nglyphs > 0 && glyph->encoding == i) {
                 /*
                  * Draw the glyph.
                  */
@@ -1020,14 +1025,14 @@ fontgrid_draw_cells(GtkWidget *widget, gint32 start, gint32 end,
                 /*
                  * Clear the empty cell.
                  */
-                if (i <= 0xffff && IsSelected(i, pi->selmap))
+                if (i <= 0x10ffff && IsSelected(i, pi->selmap))
                   gdk_draw_rectangle(gtk_widget_get_window(widget), gc, TRUE,
                                      rect.x + 1, rect.y + 1,
                                      rect.width - 1, rect.height - 1);
                 else {
                     gdk_window_clear_area(gtk_widget_get_window(widget), rect.x, rect.y,
                                           rect.width, rect.height);
-                    if (i > 0xffff) {
+                    if (i > 0x10ffff) {
                         gdk_draw_line(gtk_widget_get_window(widget), gc, rect.x, rect.y,
                                       rect.x + rect.width,
                                       rect.y + rect.height);
@@ -1183,8 +1188,8 @@ fontgrid_deselect_all(Fontgrid *fw)
     /*
      * Now clear the selected bitmaps.
      */
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
-    (void) memset((char *) opi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
+    (void) memset((char *) opi->selmap, 0, sizeof(guint32) * 65536);
 
     /*
      * Reset the selection start and end points.
@@ -1429,7 +1434,7 @@ start_selection(GtkWidget *widget, GdkEventButton *event)
     /*
      * Any code greater than the maximum is ignored.
      */
-    if (code > 0xffff)
+    if (code > 0x10ffff)
       return;
 
     gp = 0;
@@ -1527,7 +1532,7 @@ extend_selection(GtkWidget *widget, gint16 x, gint16 y)
     /*
      * Any code greater than the maximum is ignored.
      */
-    if (code > 0xffff)
+    if (code > 0x10ffff)
       return;
 
     gp = 0;
@@ -1802,7 +1807,7 @@ fontgrid_shift_key_press(GtkWidget *widget, GdkEventKey *event)
          */
         if ((fw->unencoded &&
              (gp == 0 || code == gp->encoding)) ||
-            code == 0xffff) {
+            code == 0x10ffff) {
             gdk_beep();
             return TRUE;
         }
@@ -1814,8 +1819,8 @@ fontgrid_shift_key_press(GtkWidget *widget, GdkEventKey *event)
 
         if (fw->unencoded && code > gp->encoding)
           code = gp->encoding;
-        else if (code > 0xffff)
-          code = 0xffff;
+        else if (code > 0x10ffff)
+          code = 0x10ffff;
 
         break;
       case GDK_Up:
@@ -1842,7 +1847,7 @@ fontgrid_shift_key_press(GtkWidget *widget, GdkEventKey *event)
          */
         if ((fw->unencoded &&
              (gp == 0 || code == gp->encoding)) ||
-            code == 0xffff) {
+            code == 0x10ffff) {
             gdk_beep();
             return TRUE;
         }
@@ -1854,8 +1859,8 @@ fontgrid_shift_key_press(GtkWidget *widget, GdkEventKey *event)
 
         if (fw->unencoded && code > gp->encoding)
           code = gp->encoding;
-        else if (code > 0xffff)
-          code = 0xffff;
+        else if (code > 0x10ffff)
+          code = 0x10ffff;
 
         break;
       case GDK_Return:
@@ -2023,7 +2028,7 @@ fontgrid_key_press(GtkWidget *widget, GdkEventKey *event)
          */
         if ((fw->unencoded &&
              (gp == 0 || code == gp->encoding)) ||
-            code == 0xffff) {
+            code == 0x10ffff) {
             gdk_beep();
             return TRUE;
         }
@@ -2035,8 +2040,8 @@ fontgrid_key_press(GtkWidget *widget, GdkEventKey *event)
 
         if (fw->unencoded && code > gp->encoding)
           code = gp->encoding;
-        else if (code > 0xffff)
-          code = 0xffff;
+        else if (code > 0x10ffff)
+          code = 0x10ffff;
 
         break;
       case GDK_Up:
@@ -2063,7 +2068,7 @@ fontgrid_key_press(GtkWidget *widget, GdkEventKey *event)
          */
         if ((fw->unencoded &&
              (gp == 0 || code == gp->encoding)) ||
-            code == 0xffff) {
+            code == 0x10ffff) {
             gdk_beep();
             return TRUE;
         }
@@ -2075,8 +2080,8 @@ fontgrid_key_press(GtkWidget *widget, GdkEventKey *event)
 
         if (fw->unencoded && code > gp->encoding)
           code = gp->encoding;
-        else if (code > 0xffff)
-          code = 0xffff;
+        else if (code > 0x10ffff)
+          code = 0x10ffff;
 
         break;
       case GDK_Page_Up:
@@ -2298,7 +2303,7 @@ fontgrid_class_init(gpointer g_class, gpointer class_data)
                                                       _("Initial glyph"),
                                                       _("Code of the glyph to be displayed first."),
                                                       -1,
-                                                      0xffff,
+                                                      0x10ffff,
                                                       -1,
                                                       G_PARAM_READWRITE));
 
@@ -2408,6 +2413,9 @@ fontgrid_init(GTypeInstance *obj, gpointer g_class)
                          "focus-line-width", &fwidth,
                          "focus-padding", &fpad,
                          NULL);
+    
+    fw->npage.selmap = (guint32*)malloc(65536 * sizeof(guint32));
+    fw->upage.selmap = (guint32*)malloc(65536 * sizeof(guint32));
 
     fw->base = 16;
     fw->power2 = TRUE;
@@ -2460,18 +2468,18 @@ fontgrid_init(GTypeInstance *obj, gpointer g_class)
      */
     pi = &fw->upage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
     pi = &fw->npage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
 }
 
 /**************************************************************************
@@ -2567,18 +2575,18 @@ fontgrid_newv(bdf_font_t *font, guint32 pointSize, gint32 spacing,
      */
     pi = &fw->upage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
     pi = &fw->npage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
 
     /*
      * Determine the page info from the initial glyph setting.
@@ -2605,7 +2613,7 @@ fontgrid_newv(bdf_font_t *font, guint32 pointSize, gint32 spacing,
                     font->glyphs[font->glyphs_used-1].encoding / fw->pagesize;
             } else {
                 pi->minpage = 0;
-                pi->maxpage = 0xffff / fw->pagesize;
+                pi->maxpage = 0x10ffff / fw->pagesize;
             }
         }
 
@@ -2635,7 +2643,7 @@ fontgrid_newv(bdf_font_t *font, guint32 pointSize, gint32 spacing,
                   
             } else {
                 pi->pageno = pi->minpage = 0;
-                pi->maxpage = 0xffff / fw->pagesize;
+                pi->maxpage = 0x10ffff / fw->pagesize;
                 pi->ppage = -1;
                 pi->npage = pi->pageno + 1;
             }
@@ -2772,18 +2780,18 @@ fontgrid_set_font(Fontgrid *fw, bdf_font_t *font, gint32 initial_glyph)
      */
     pi = &fw->upage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
     pi = &fw->npage;
     pi->minpage = 0;
-    pi->maxpage = 0xffff / fw->pagesize;
+    pi->maxpage = 0x10ffff / fw->pagesize;
     pi->npage = pi->ppage = -1;
     pi->pageno = pi->bcode = 0;
     pi->sel_start = pi->sel_end = -1;
-    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 2048);
+    (void) memset((char *) pi->selmap, 0, sizeof(guint32) * 65536);
 
     /*
      * Determine the page info from the initial glyph setting.
@@ -2810,7 +2818,7 @@ fontgrid_set_font(Fontgrid *fw, bdf_font_t *font, gint32 initial_glyph)
                     font->glyphs[font->glyphs_used-1].encoding / fw->pagesize;
             } else {
                 pi->minpage = 0;
-                pi->maxpage = 0xffff / fw->pagesize;
+                pi->maxpage = 0x10ffff / fw->pagesize;
             }
         }
 
@@ -2840,7 +2848,7 @@ fontgrid_set_font(Fontgrid *fw, bdf_font_t *font, gint32 initial_glyph)
                   
             } else {
                 pi->pageno = pi->minpage = 0;
-                pi->maxpage = 0xffff / fw->pagesize;
+                pi->maxpage = 0x10ffff / fw->pagesize;
                 pi->ppage = -1;
                 pi->npage = pi->pageno + 1;
             }
@@ -3076,7 +3084,7 @@ fontgrid_goto_page(Fontgrid *fw, gint32 pageno)
 
     pi = (!fw->unencoded) ? &fw->npage : &fw->upage;
 
-    mpage = 0xffff / fw->pagesize;
+    mpage = 0x10ffff / fw->pagesize;
 
     if (pageno < 0)
       pageno = 0;
@@ -3102,8 +3110,8 @@ fontgrid_goto_code(Fontgrid *fw, gint32 code)
 
     if (code < 0)
       code = 0;
-    if (code > 0xffff)
-      code = 0xffff;
+    if (code > 0x10ffff)
+      code = 0x10ffff;
 
     pageno = code / fw->pagesize;
 
@@ -4356,13 +4364,13 @@ fontgrid_paste_selection(Fontgrid *fw, FontgridPasteType paste_type)
          * This means that a new glyph list needs to be constructed to do the
          * insert into the unencoded area.
          */
-        if (!unenc && pi->sel_end > 0xffff) {
+        if (!unenc && pi->sel_end > 0x10ffff) {
             /*
              * Determine if any of the glyphs would actually get encoded after
-             * 0xffff or if those are all empty glyphs.
+             * 0x10ffff or if those are all empty glyphs.
              */
             for (ng = 0, gp = gl->glyphs; ng < gl->glyphs_used; ng++, gp++) {
-                if (pi->sel_start + (gp->encoding - gl->start) > 0xffff)
+                if (pi->sel_start + (gp->encoding - gl->start) > 0x10ffff)
                   /*
                    * The glyph list does contain glyphs that will overflow.
                    */
@@ -4372,7 +4380,7 @@ fontgrid_paste_selection(Fontgrid *fw, FontgridPasteType paste_type)
             if (ng < gl->glyphs_used) {
                 /*
                  * Construct a new glyph list containing only the glyphs that
-                 * overflow the 0xffff boundary.  There is no need to
+                 * overflow the 0x10ffff boundary.  There is no need to
                  * recalculate the bounding box for the new glyph list.  Any
                  * resize will be handled correctly anyway.
                  */
@@ -4396,8 +4404,8 @@ fontgrid_paste_selection(Fontgrid *fw, FontgridPasteType paste_type)
              * limit before pasting the glyphs into the font.
              */
             gl->glyphs_used = ng;
-            gl->end -= pi->sel_end - 0xffff;
-            pi->sel_end = 0xffff;
+            gl->end -= pi->sel_end - 0x10ffff;
+            pi->sel_end = 0x10ffff;
         }
 
         /*
@@ -4654,7 +4662,7 @@ fontgrid_select_next_glyph(Fontgrid *fw, gint32 code)
      */
     if ((fw->unencoded &&
          (gp == 0 || code == gp->encoding)) ||
-        code == 0xffff) {
+        code == 0x10ffff) {
         gdk_beep();
         return FALSE;
     }
@@ -4666,8 +4674,8 @@ fontgrid_select_next_glyph(Fontgrid *fw, gint32 code)
 
     if (fw->unencoded && code > gp->encoding)
       code = gp->encoding;
-    else if (code > 0xffff)
-      code = 0xffff;
+    else if (code > 0x10ffff)
+      code = 0x10ffff;
 
     fontgrid_deselect_all(fw);
 

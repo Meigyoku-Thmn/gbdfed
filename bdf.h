@@ -280,8 +280,8 @@ typedef struct {
 
     void *internal;             /* Internal data for the font.           */
 
-    unsigned int nmod[2048];   /* Bitmap indicating modified glyphs.    */
-    unsigned int umod[2048];   /* Bitmap indicating modified unencoded. */
+    unsigned int nmod[65536];   /* Bitmap indicating modified glyphs.    */
+    unsigned int umod[65536];   /* Bitmap indicating modified unencoded. */
 
     unsigned short modified;    /* Boolean indicating font modified.     */
     unsigned short bpp;         /* Bits per pixel.                       */

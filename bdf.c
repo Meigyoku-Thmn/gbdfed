@@ -362,7 +362,7 @@ typedef struct {
     void *client_data;
     bdf_callback_t callback;
     bdf_callback_struct_t cb;
-    unsigned int have[2048];
+    unsigned int have[65536];
     _bdf_list_t list;
 } _bdf_parse_t;
 
@@ -1370,11 +1370,12 @@ _bdf_parse_glyphs(char *line, unsigned int linelen, unsigned int lineno,
         p->glyph_enc = _bdf_atol(p->list.field[1], 0, 10);
 
         /*
-         * Check to see if this encoding has already been encountered.  If it
-         * has then change it to unencoded so it gets added if indicated.
+         * Check to see if this encoding has already been encountered 
+         * or exceed 0x10ffff boundary.  If it has then change it 
+         * to unencoded so it gets added if indicated.
          */
         if (p->glyph_enc >= 0) {
-            if (_bdf_glyph_modified(p->have, p->glyph_enc)) {
+            if (p->glyph_enc > 0x10FFFF || _bdf_glyph_modified(p->have, p->glyph_enc)) {
                 /*
                  * Add a message saying a glyph has been moved to the
                  * unencoded area.
@@ -3072,7 +3073,7 @@ bdf_export_hex(FILE *out, bdf_font_t *font, bdf_options_t *opts,
 
     for (i = 0, ng = font->glyphs_used, gp = font->glyphs; i < ng; i++, gp++) {
         _bdf_pad_cell(font, gp, &cell);
-        fprintf(out, "%04X:", gp->encoding & 0xffff);
+        fprintf(out, "%06X:", gp->encoding & 0x1fffff);
         if (gp->bbx.width <= (font->bbx.width >> 1)) {
             for (j = 0; j < cell.bytes; j += fbpr) {
                 for (k = 0; k < bpr; k++)
@@ -5213,18 +5214,18 @@ bdf_insert_glyphs(bdf_font_t *font, int start, bdf_glyphlist_t *glyphs)
 
     /*
      * Go through the glyphs that would be shifted due to the insertion and
-     * determine if some of them will overflow the 0xffff boundary.
+     * determine if some of them will overflow the 0x10ffff boundary.
      */
     n = (glyphs->end - glyphs->start) + 1;
     for (which = i; i < ng; i++, gp++) {
-        if (gp->encoding + n > 0xffff)
+        if (gp->encoding + n > 0x10ffff)
           break;
     }
 
     if (i < ng) {
         /*
          * Some glyphs have to be moved to the unencoded area because they
-         * would overflow the 0xffff boundary if they were moved up.
+         * would overflow the 0x10ffff boundary if they were moved up.
          */
         bdf_copy_glyphs(font, gp->encoding, font->glyphs[ng - 1].encoding,
                         &font->overflow, 0);
@@ -5668,8 +5669,8 @@ bdf_set_modified(bdf_font_t *font, int modified)
         /*
          * Clear out the modified bitmaps.
          */
-        (void) memset((char *) font->nmod, 0, sizeof(unsigned int) * 2048);
-        (void) memset((char *) font->umod, 0, sizeof(unsigned int) * 2048);
+        (void) memset((char *) font->nmod, 0, sizeof(unsigned int) * 65536);
+        (void) memset((char *) font->umod, 0, sizeof(unsigned int) * 65536);
     }
     font->modified = modified;
 }

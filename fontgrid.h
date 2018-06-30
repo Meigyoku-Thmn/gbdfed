@@ -59,7 +59,7 @@ typedef struct {
     gint32 sel_start;
     gint32 sel_end;
 
-    guint32 selmap[2048];
+    guint32 *selmap;
 } FontgridInternalPageInfo;
 
 struct _Fontgrid {

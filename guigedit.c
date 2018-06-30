@@ -483,7 +483,7 @@ update_glyphedit(gbdfed_editor_t *ed, GlypheditRec *ge, bdf_glyph_grid_t *grid)
     else
       gtk_widget_set_sensitive(ge->button_prev, TRUE);
 
-    if (glyphedit_get_encoding(gw) == 0xffff)
+    if (glyphedit_get_encoding(gw) == 0x10ffff)
       gtk_widget_set_sensitive(ge->button_next, FALSE);
     else
       gtk_widget_set_sensitive(ge->button_next, TRUE);
@@ -687,7 +687,7 @@ edit_menu_up(GtkWidget *w, GdkEvent *event, gpointer data)
     else
       gtk_widget_set_sensitive(ge->prev, TRUE);
 
-    if (glyphedit_get_encoding(gw) == 0xffff)
+    if (glyphedit_get_encoding(gw) == 0x10ffff)
       gtk_widget_set_sensitive(ge->next, FALSE);
     else
       gtk_widget_set_sensitive(ge->next, TRUE);
@@ -2130,7 +2130,7 @@ guigedit_edit_glyph(gbdfed_editor_t *ed, FontgridSelectionInfo *si)
     else
       gtk_widget_set_sensitive(ge->button_prev, TRUE);
 
-    if (glyphedit_get_encoding(GLYPHEDIT(ge->gedit)) == 0xffff)
+    if (glyphedit_get_encoding(GLYPHEDIT(ge->gedit)) == 0x10ffff)
       gtk_widget_set_sensitive(ge->button_next, FALSE);
     else
       gtk_widget_set_sensitive(ge->button_next, TRUE);
